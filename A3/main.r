@@ -1,5 +1,6 @@
 library(MASS)
 library(boot)
+library(glmnet)
 library(RCurl) # for read.table()
 
 # TASK 1
@@ -42,15 +43,33 @@ loocv.err$delta[1]
 # 5-fold CV
 cv.5.err = cv.glm(train , glm.fit, K=5) # the default cost fun is the average squared error function
 cv.5.err$delta[1]
-# 0.6833892
+# [1] 0.6833892
 
 
 # 10-fold CV
 cv.10.err = cv.glm(train , glm.fit, K=10)
 cv.10.err$delta[1]
-# 0.602335
+# [1] 0.602335
 
 
 # predict test
 mean((test$lpsa - predict(glm.fit, test))^2)
 # [1] 0.521274
+
+
+# TASK 3
+
+x = model.matrix(lpsa???.,train)[,-1]
+y = train$lpsa;
+
+
+# create sequence of values for lmabda ranging from 10^-2 to 10^10 
+lmabda =10^seq(-2, 10, length = 100)
+# we've already standardize data, thus we set standardize=FALSE
+ridge.mod=glmnet (x, y, alpha=0, lambda=lmabda, standardize=FALSE) 
+
+
+plot(ridge.mod, xvar = "lambda", label = TRUE)
+
+
+# TAKS 4
