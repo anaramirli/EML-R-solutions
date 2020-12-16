@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1608143940173.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1545652225",
+    "id" : "E5DD0E4B",
+    "lastKnownWriteTime" : 1608148835,
+    "last_content_update" : 1608148835398,
+    "path" : "E:/master_studies/ws20-21/eml/decel-joshua-ile-R/A3/main.r",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "17,42",
+        "scrollLine" : "8",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
