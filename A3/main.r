@@ -60,10 +60,10 @@ mean((test$lpsa - predict(glm.fit, test))^2)
 # TASK 3
 
 # get train/test matrices
-x.train = model.matrix(lpsa???.,train)[,-1]
+x.train = model.matrix(lpsa~.,train)[,-1]
 y.train = train$lpsa;
 
-x.test = model.matrix(lpsa???.,test)[,-1]
+x.test = model.matrix(lpsa~.,test)[,-1]
 y.test = test$lpsa;
 
 
