@@ -1,4 +1,5 @@
 library(MASS)
+library(boot)
 library(RCurl) # for read.table()
 
 # TASK 1
@@ -13,42 +14,39 @@ test <-subset(df, train == "FALSE", select=-(train))
 
 # normalize each input feature to a mean of 0 and a variance of 1
 # exclude the target from features
-for (col_name in colnames(subset(train, select=-(lpsa)))){
+
+feature_names <- colnames(subset(train, select=-(lpsa)))
+
+for (i_name in feature_names){
   
   # get the mean and var of train features
-  mean = mean(as.numeric(unlist(train[col_name])))
-  sd  = sd(as.numeric(unlist(train[col_name])))
+  mean = mean(as.numeric(unlist(train[i_name])))
+  sd  = sd(as.numeric(unlist(train[i_name])))
   
-  train[col_name] = (as.numeric(unlist(train[col_name]))-mean)/sd
-  test[col_name] = (as.numeric(unlist(test[col_name]))-mean)/sd
+  train[i_name] = (as.numeric(unlist(train[i_name]))-mean)/sd
+  test[i_name] = (as.numeric(unlist(test[i_name]))-mean)/sd
 }
 
 
 # TASK 2
 
+# creates lpsa ~ lcavol  +  lweight + age + lbph + svi + lcp + gleason + pgg45 formula
+f <- paste(feature_names[1], " + ", paste(feature_names[-1], collapse=" + "))
+formula <- as.formula(paste("lpsa ~ ", f))
+# build regression function
+glm.fit = glm(formula ,data=train)
 
 # LOOCV
-
-library(boot)
-
-glm.fit=glm(mpg???horsepower ,data=Auto)
-> cv.err=cv.glm(Auto ,glm.fit)
-> cv.err$delta
+loocv.err = cv.glm(train , glm.fit)
+loocv.err$delta[1]
 
 
-cv.error.5=rep(0,5)
-for (i in 1:5){
-  glm.fit=glm(mpg~horsepower ,i),data=Auto)
-  cv.error[i]=cv.glm(Auto ,glm.fit)$delta [1]
-}
-
-> cv.error=rep(0,5)
-> for (i in 1:5){
-  + glm.fit=glm(mpg???poly(horsepower ,i),data=Auto)
-  + cv.error[i]=cv.glm(Auto ,glm.fit)$delta [1]
-  + }
-> cv.error
-  
+# 5-fold CV
+cv.5.err = cv.glm(train , glm.fit, K=5)
+cv.5.err$delta[1]
 
 
+# 10-fold CV
+cv.10.err = cv.glm(train , glm.fit, K=10)
+cv.10.err$delta[1]
 
