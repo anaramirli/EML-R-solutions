@@ -112,3 +112,34 @@ lines(test.MSE, pch=18, col="blue", type="b", lty=2)
 # Add a legend
 legend(1, 95, legend=c("Train", "Test"),
        col=c("red", "blue"), lty=1:2, cex=0.8)
+
+
+# TASK 3
+
+test.MSE <- c()
+train.MSE <-c()
+
+M <- 8 
+for (m in 1:M){
+  
+  plsr.fit = plsr(lpsa~., data=train, ncomp=m, scale=F) # we've already normalized data
+  
+  # train result
+  plsr.pred.train = predict(plsr.fit, train, ncomp=m, scale=F)
+  mse = mean((plsr.pred.train-y.train)^2)
+  train.MSE <- c(train.MSE, mse)
+  
+  # test resut
+  plsr.pred.test = predict(plsr.fit, test, ncomp=m, scale=F)
+  mse = mean((plsr.pred.test-y.test)^2)
+  test.MSE <- c(test.MSE, mse)
+  
+}
+
+plot(train.MSE, type="b", pch=19, col="red", xlab = "number of directions M", ylab = "MSE")
+# Add a line
+lines(test.MSE, pch=18, col="blue", type="b", lty=2)
+# Add a legend
+legend(1, 95, legend=c("Train", "Test"),
+       col=c("red", "blue"), lty=1:2, cex=0.8)
+
