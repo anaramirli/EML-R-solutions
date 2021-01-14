@@ -106,6 +106,7 @@ for (m in 1:M){
   
 }
 
+
 plot(train.MSE, type="b", pch=19, col="red", xlab = "principal components M", ylab = "MSE")
 # Add a line
 lines(test.MSE, pch=18, col="blue", type="b", lty=2)
@@ -116,8 +117,8 @@ legend(1, 95, legend=c("Train", "Test"),
 
 # TASK 3
 
-test.MSE <- c()
-train.MSE <-c()
+test.plsr.MSE <- c()
+train.plsr.MSE <-c()
 
 M <- 8 
 for (m in 1:M){
@@ -127,19 +128,62 @@ for (m in 1:M){
   # train result
   plsr.pred.train = predict(plsr.fit, train, ncomp=m, scale=F)
   mse = mean((plsr.pred.train-y.train)^2)
-  train.MSE <- c(train.MSE, mse)
+  train.plsr.MSE <- c(train.plsr.MSE, mse)
   
   # test resut
   plsr.pred.test = predict(plsr.fit, test, ncomp=m, scale=F)
   mse = mean((plsr.pred.test-y.test)^2)
-  test.MSE <- c(test.MSE, mse)
+  test.plsr.MSE <- c(test.plsr.MSE, mse)
   
 }
 
-plot(train.MSE, type="b", pch=19, col="red", xlab = "number of directions M", ylab = "MSE")
+
+plot(train.plsr.MSE, type="b", pch=19, col="red", xlab = "number of directions M", ylab = "MSE")
 # Add a line
-lines(test.MSE, pch=18, col="blue", type="b", lty=2)
+lines(test.plsr.MSE, pch=18, col="blue", type="b", lty=2)
 # Add a legend
 legend(1, 95, legend=c("Train", "Test"),
        col=c("red", "blue"), lty=1:2, cex=0.8)
 
+
+# TASK 4
+
+
+# combined data
+combined.data.x = subset(df, select=-c(lpsa, train))
+combined.data.y = subset(df, select=(lpsa))
+
+# perform pca
+pca.combined.out = prcomp(combined.data, scale=T)
+                          
+# assign color to each element of a LPSA vector
+Cols = function(vec){
+  cols = rainbow(2)
+  return(cols[as.numeric(as.factor(ifelse(vec>2.5, "+", "-")))])
+}
+
+
+par(mfrow=c(3,2))
+plot(pca.combined.out$x[,1:2], col=Cols(combined.data.y))
+
+combined.data.y
+pca.combined.out$x[,1:2]
+# # function to print pca projection
+# plot_pcs_projection <- function(pca.out, vec){
+#   
+#   # function to assign color to each elements of a LPSA vector based on thershold of 2.5
+#   cols = rainbow(2)
+#   colored.vec = cols[as.numeric(as.factor(ifelse(vec>2.5, "+", "-")))]
+#   
+#   par(mfrow=c(3,2))
+#   plot(pca.out$x[, 1:2],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-2")
+#   plot(pca.out$x[, 1:3],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-3")
+#   plot(pca.out$x[, 1:4],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-4")
+#   plot(pca.out$x[, 2:3],col=colored.vec, pch=19, xlab="PCA-2", ylab="PCA-3")
+#   plot(pca.out$x[, 2:4],col=colored.vec, pch=19, xlab="PCA-2", ylab="PCA-3")
+#   plot(pca.out$x[, 3:4],col=colored.vec, pch=19, xlab="PCA-3", ylab="PCA-4")
+#   
+# }
+# 
+# plot_pcs_projection(pca.combined.out, combined.data.y)
+# plot_pcs_projection(pca.train.out, y.train)
