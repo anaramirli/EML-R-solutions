@@ -4,7 +4,7 @@ library(MASS)
 library(boot)
 library(glmnet)
 library(RCurl) # for read.table()
- 
+
 install.packages("leaps") # fot subset selection
 library(leaps)
 install.packages("pls")
@@ -24,11 +24,11 @@ test <-subset(df, train == "FALSE", select=-(train))
 feature_names <- colnames(subset(train, select=-(lpsa)))
 # normalize each input feature to a mean of 0 and a variance of 1
 for (i_name in feature_names){
-
+  
   # get the mean and var of train features
   mean = mean(as.numeric(unlist(train[i_name])))
   sd  = sd(as.numeric(unlist(train[i_name])))
-
+  
   train[i_name] = (as.numeric(unlist(train[i_name]))-mean)/sd
   test[i_name] = (as.numeric(unlist(test[i_name]))-mean)/sd
 }
@@ -86,8 +86,8 @@ mean((y.test-test.pred)^2)
 
 # TASK 2
 
-test.MSE <- c()
-train.MSE <-c()
+test.MSE <- numeric()
+train.MSE <-numeric()
 
 M <- 8 
 for (m in 1:M){
@@ -106,8 +106,9 @@ for (m in 1:M){
   
 }
 
-
+plot.new()
 plot(train.MSE, type="b", pch=19, col="red", xlab = "principal components M", ylab = "MSE")
+mtext("PCR")
 # Add a line
 lines(test.MSE, pch=18, col="blue", type="b", lty=2)
 # Add a legend
@@ -117,8 +118,8 @@ legend(1, 95, legend=c("Train", "Test"),
 
 # TASK 3
 
-test.plsr.MSE <- c()
-train.plsr.MSE <-c()
+test.plsr.MSE <- numeric()
+train.plsr.MSE <-numeric()
 
 M <- 8 
 for (m in 1:M){
@@ -137,8 +138,9 @@ for (m in 1:M){
   
 }
 
-
+plot.new()
 plot(train.plsr.MSE, type="b", pch=19, col="red", xlab = "number of directions M", ylab = "MSE")
+mtext("PLS")
 # Add a line
 lines(test.plsr.MSE, pch=18, col="blue", type="b", lty=2)
 # Add a legend
@@ -153,37 +155,64 @@ legend(1, 95, legend=c("Train", "Test"),
 combined.data.x = subset(df, select=-c(lpsa, train))
 combined.data.y = subset(df, select=(lpsa))
 
-# perform pca
-pca.combined.out = prcomp(combined.data, scale=T)
-                          
-# assign color to each element of a LPSA vector
-Cols = function(vec){
+# Perform PCA
+# combined
+pca.combined.out = prcomp(combined.data.x, scale=T)
+summary(pca.combined.out)
+# train
+pca.train.out = prcomp(train, scale=F)
+summary(pca.train.out)
+
+
+# function to print pca projection
+plot_projection <- function(out, vec, type="pca", title="projection"){
+
+  # this function will be used to plot projections in task 4 and 5
+  
+  # out: fitted component models
+  # vec: target data vector
+  # type: used to know which kind of DM technique it's, because projected component X is acquired  by different object in each of them.
+  # title: plot title
+  
+  # function to assign color to each elements of a LPSA vector based on threshold of 2.5
   cols = rainbow(2)
-  return(cols[as.numeric(as.factor(ifelse(vec>2.5, "+", "-")))])
+  colored.vec = cols[as.numeric(as.factor(ifelse(vec>2.5, "+", "-")))]
+
+  # get component projection x
+  if (type=="pca") {proj=out$x}
+  else if (type=="pls") {proj=out$scores}
+  
+  # add plot
+  par(mfrow=c(3,2))
+  plot(proj[, 1:2],col=colored.vec, pch=19, xlab="Z1", ylab="Z2")
+  mtext(title, side=3)
+  plot(proj[, 1:3],col=colored.vec, pch=19, xlab="Z1", ylab="Z3")
+  plot(proj[, 1:4],col=colored.vec, pch=19, xlab="Z1", ylab="Z4")
+  plot(proj[, 2:3],col=colored.vec, pch=19, xlab="Z2", ylab="Z3")
+  plot(proj[, 2:4],col=colored.vec, pch=19, xlab="Z2", ylab="Z4")
+  plot(proj[, 3:4],col=colored.vec, pch=19, xlab="Z3", ylab="Z5")
+  
+
 }
 
+# plot
+plot_projection(pca.combined.out, combined.data.y, type="pca", title="PCA Combined Projection")
+plot_projection(pca.train.out, y.train, type="pca", title="PCA Train Projection")
 
-par(mfrow=c(3,2))
-plot(pca.combined.out$x[,1:2], col=Cols(combined.data.y))
 
-combined.data.y
-pca.combined.out$x[,1:2]
-# # function to print pca projection
-# plot_pcs_projection <- function(pca.out, vec){
-#   
-#   # function to assign color to each elements of a LPSA vector based on thershold of 2.5
-#   cols = rainbow(2)
-#   colored.vec = cols[as.numeric(as.factor(ifelse(vec>2.5, "+", "-")))]
-#   
-#   par(mfrow=c(3,2))
-#   plot(pca.out$x[, 1:2],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-2")
-#   plot(pca.out$x[, 1:3],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-3")
-#   plot(pca.out$x[, 1:4],col=colored.vec, pch=19, xlab="PCA-1", ylab="PCA-4")
-#   plot(pca.out$x[, 2:3],col=colored.vec, pch=19, xlab="PCA-2", ylab="PCA-3")
-#   plot(pca.out$x[, 2:4],col=colored.vec, pch=19, xlab="PCA-2", ylab="PCA-3")
-#   plot(pca.out$x[, 3:4],col=colored.vec, pch=19, xlab="PCA-3", ylab="PCA-4")
-#   
-# }
-# 
-# plot_pcs_projection(pca.combined.out, combined.data.y)
-# plot_pcs_projection(pca.train.out, y.train)
+
+# TASK 5
+
+# Perform PLS
+# combined
+pls.combined.out = plsr(lpsa~., data=subset(df, select=-c(train)), scale=T)
+summary(pls.combined.out)
+# train
+pls.train.out = plsr(lpsa~., data=train, scale=F)
+summary(pls.train.out)
+
+# plot
+plot_projection(pls.combined.out, combined.data.y, type="pls", title="PLS Combined Projection")
+plot_projection(pls.train.out, y.train, type="pls", title="PLS Train Projection")
+
+
